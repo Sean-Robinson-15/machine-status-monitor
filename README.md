@@ -30,7 +30,7 @@ Simple real-time webpage to display up/down status of local machines via ping.
 
 1. Install dependencies:
 ```bash
-pip install flask pythonping
+pip install -r requirements.txt
 ```
 
 2. Run the server:
