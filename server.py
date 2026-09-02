@@ -4,12 +4,61 @@ import threading
 import time
 import sys
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def resource_path(rel):
     """Resolve a path that works both in dev and inside a PyInstaller bundle."""
     base = sys._MEIPASS if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base, rel)
+
+def get_ssl_context():
+    """Return (certfile, keyfile) for HTTPS, generating a self-signed cert on first run."""
+    cert_dir = os.path.join(os.path.expanduser('~'), '.machine-status-monitor')
+    cert_file = os.path.join(cert_dir, 'cert.pem')
+    key_file = os.path.join(cert_dir, 'key.pem')
+
+    if os.path.exists(cert_file) and os.path.exists(key_file):
+        return cert_file, key_file
+
+    os.makedirs(cert_dir, exist_ok=True)
+
+    from cryptography import x509
+    from cryptography.x509.oid import NameOID
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    import ipaddress
+
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    subject = issuer = x509.Name([
+        x509.NameAttribute(NameOID.COMMON_NAME, 'localhost'),
+    ])
+    now = datetime.utcnow()
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(subject)
+        .issuer_name(issuer)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now - timedelta(days=1))
+        .not_valid_after(now + timedelta(days=3650))
+        .add_extension(x509.SubjectAlternativeName([
+            x509.DNSName('localhost'),
+            x509.DNSName('machine-status-monitor'),
+            x509.IPAddress(ipaddress.ip_address('127.0.0.1')),
+        ]), critical=False)
+        .sign(key, hashes.SHA256())
+    )
+
+    with open(key_file, 'wb') as f:
+        f.write(key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.TraditionalOpenSSL,
+            serialization.NoEncryption(),
+        ))
+    with open(cert_file, 'wb') as f:
+        f.write(cert.public_bytes(serialization.Encoding.PEM))
+
+    return cert_file, key_file
 
 app = Flask(__name__, static_folder=resource_path('static'))
 
@@ -149,4 +198,5 @@ def api_machines():
     return jsonify([{ 'host': k, 'description': v } for k, v in MACHINES.items()])
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    cert_file, key_file = get_ssl_context()
+    app.run(host='0.0.0.0', port=5001, debug=False, ssl_context=(cert_file, key_file))

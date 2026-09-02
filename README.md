@@ -38,7 +38,11 @@ pip install -r requirements.txt
 python server.py
 ```
 
-3. Open browser to: http://localhost:5000
+3. Open browser to: https://localhost:5001
+
+> The server uses HTTPS with a self-signed certificate (auto-generated on first
+> run in `~/.machine-status-monitor/`). Your browser will show a security
+> warning — click "Advanced" → "Proceed" to continue.
 
 ## Deploy as a standalone .exe (no Python needed)
 
@@ -53,8 +57,14 @@ pyinstaller --noconsole --onefile --name MachineStatusMonitor --add-data "static
 
 The result is `dist\MachineStatusMonitor.exe`. Copy that one file to any
 Windows machine and double-click it — it runs silently in the background with
-no console window. Navigate to `http://localhost:5000` in your browser to view
+no console window. Navigate to `https://localhost:5001` in your browser to view
 the dashboard.
+
+> **HTTPS note:** the exe serves over HTTPS using a self-signed certificate that
+> is generated automatically on first run (stored in
+> `~\.machine-status-monitor\`). Browsers will show a "not secure" warning for
+> self-signed certs — click **Advanced → Proceed** once. To silence it, import
+> `cert.pem` into the machine's Trusted Root store.
 
 Notes:
 - On non-Windows build hosts, use `--add-data "static:static"` (colon instead
