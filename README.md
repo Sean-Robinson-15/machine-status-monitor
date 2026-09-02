@@ -19,7 +19,7 @@ Simple real-time webpage to display up/down status of local machines via ping.
 - HEPWIN2019-67, HEPWIN2019-72, HEPWIN2019-73, HEPWIN2022-07
 - HEPWIN2022-08, HEPWIN2022-17
 
-## Setup
+## Run from source
 
 ### Prerequisites
 
@@ -39,6 +39,28 @@ python server.py
 ```
 
 3. Open browser to: http://localhost:5000
+
+## Deploy as a standalone .exe (no Python needed)
+
+Build a single self-contained Windows executable that anyone can run by
+double-clicking — no Python, no pip, no dependencies on the target machine.
+
+```powershell
+pip install pyinstaller
+pyinstaller --onefile --name MachineStatusMonitor --add-data "static;static" server.py
+```
+
+The result is `dist\MachineStatusMonitor.exe`. Copy that one file to any
+Windows machine and double-click it — the browser opens at
+`http://localhost:5000` automatically.
+
+Notes:
+- On non-Windows build hosts, use `--add-data "static:static"` (colon instead
+  of semicolon).
+- The exe uses the system `ping` command under the hood, so it works without
+  administrator rights.
+- To run it persistently (e.g. on a server), register the exe as a Windows
+  service via [NSSM](https://nssm.cc/) or a Task Scheduler startup task.
 
 The server will automatically:
 - Start pinging all machines every 30 seconds

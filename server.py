@@ -2,9 +2,16 @@ from flask import Flask, jsonify, send_from_directory
 from pythonping import ping
 import threading
 import time
+import sys
+import os
 from datetime import datetime
 
-app = Flask(__name__, static_folder='static')
+def resource_path(rel):
+    """Resolve a path that works both in dev and inside a PyInstaller bundle."""
+    base = sys._MEIPASS if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base, rel)
+
+app = Flask(__name__, static_folder=resource_path('static'))
 
 MACHINES = {
     "HEPWIN2022-02": "HEPWIN2022-02 - TSE SolidWorks",
@@ -113,7 +120,7 @@ monitor_thread.start()
 
 @app.route('/')
 def index():
-    return send_from_directory('static', 'index.html')
+    return send_from_directory(resource_path('static'), 'index.html')
 
 @app.route('/api/status')
 def api_status():
@@ -159,4 +166,4 @@ if __name__ == '__main__':
     if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
         threading.Thread(target=open_browser, daemon=True).start()
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
