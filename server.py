@@ -149,21 +149,4 @@ def api_machines():
     return jsonify([{ 'host': k, 'description': v } for k, v in MACHINES.items()])
 
 if __name__ == '__main__':
-    import webbrowser
-    import os
-    import threading
-    
-    # Open browser after a short delay - only in main process
-    def open_browser():
-        time.sleep(1.5)
-        url = 'http://localhost:5000'
-        try:
-            webbrowser.open_new(url)
-        except:
-            pass
-    
-    # Only open browser if not in reloader child process
-    if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
-        threading.Thread(target=open_browser, daemon=True).start()
-    
     app.run(host='0.0.0.0', port=5000, debug=False)

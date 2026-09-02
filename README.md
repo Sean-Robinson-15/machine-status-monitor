@@ -43,16 +43,18 @@ python server.py
 ## Deploy as a standalone .exe (no Python needed)
 
 Build a single self-contained Windows executable that anyone can run by
-double-clicking — no Python, no pip, no dependencies on the target machine.
+double-clicking — no Python, no pip, no dependencies on the target machine, and
+no command-line window.
 
 ```powershell
 pip install pyinstaller
-pyinstaller --onefile --name MachineStatusMonitor --add-data "static;static" server.py
+pyinstaller --noconsole --onefile --name MachineStatusMonitor --add-data "static;static" server.py
 ```
 
 The result is `dist\MachineStatusMonitor.exe`. Copy that one file to any
-Windows machine and double-click it — the browser opens at
-`http://localhost:5000` automatically.
+Windows machine and double-click it — it runs silently in the background with
+no console window. Navigate to `http://localhost:5000` in your browser to view
+the dashboard.
 
 Notes:
 - On non-Windows build hosts, use `--add-data "static:static"` (colon instead
