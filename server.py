@@ -6,6 +6,8 @@ import sys
 import os
 from datetime import datetime, timedelta
 
+##Hello World##
+
 def resource_path(rel):
     """Resolve a path that works both in dev and inside a PyInstaller bundle."""
     base = sys._MEIPASS if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
